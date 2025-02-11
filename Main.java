@@ -16,11 +16,7 @@ public class Main {
             System.out.println("O jogo deve ter entre 2 e 6 jogadores. Quantos jogadores?");
             numJogadores = scanner.nextInt();
         }
-
-        System.out.println("Escolha os tipos de jogadores: ");
-        System.out.println("1. Jogador Com Sorte");
-        System.out.println("2. Jogador Azarado");
-        System.out.println("3. Jogador Normal");
+        System.out.println("Ótimo! Agora digite os seguintes dados: ");
 
         for (int i = 0; i < numJogadores; i++) {
             System.out.println("Nome do jogador " + (i + 1) + ":");
@@ -28,23 +24,14 @@ public class Main {
             System.out.println("Cor do jogador " + nome + ":");
             String cor = scanner.next();
 
+            System.out.println("Existem os seguintes tipos de jogadores: ");
+            System.out.println("1. Jogador Com Sorte");
+            System.out.println("2. Jogador Azarado");
+            System.out.println("3. Jogador Normal");
             System.out.println("Escolha o tipo do jogador " + nome + " (1, 2 ou 3):");
             int tipo = scanner.nextInt();
 
-            Jogador jogador;
-            switch (tipo) {
-                case 1:
-                    jogador = new JogadorComSorte(nome, cor);
-                    break;
-                case 2:
-                    jogador = new JogadorAzarado(nome, cor);
-                    break;
-                case 3:
-                default:
-                    jogador = new JogadorNormal(nome, cor);
-                    break;
-            }
-            jogadores.add(jogador);
+            JogadorFactory.criarJogador(tipo, jogadores, nome, cor);
         }
 
         // Verificação para garantir pelo menos dois jogadores de tipos diferentes
@@ -63,7 +50,6 @@ public class Main {
             System.out.println("O jogo deve ter pelo menos dois jogadores de tipos diferentes. Reinicie o jogo e escolha tipos diferentes.");
             return;
         }
-
         List<Casa> casas = new ArrayList<>();
         System.out.println("Quantas casas no tabuleiro?");
         int numCasas = scanner.nextInt();
@@ -71,36 +57,7 @@ public class Main {
         for (int i = 0; i < numCasas; i++) {
             System.out.println("Tipo da casa " + (i + 1) + " (Simples, Surpresa, Prisao, Sorte, Azar, Reversa, JogaDeNovo, Troca):");
             String tipo = scanner.next();
-            switch (tipo.toLowerCase()) {
-                case "simples":
-                    casas.add(new CasaSimples(i));
-                    break;
-                case "surpresa":
-                    casas.add(new CasaSurpresa(i));
-                    break;
-                case "prisao":
-                    casas.add(new CasaPrisao(i));
-                    break;
-                case "sorte":
-                    casas.add(new CasaSorte(i));
-                    break;
-                case "azar":
-                    casas.add(new CasaAzar(i));
-                    break;
-                case "reversa":
-                    casas.add(new CasaReversa(i));
-                    break;
-                case "jogadenovo":
-                    casas.add(new CasaJogaDeNovo(i));
-                    break;
-                case "troca":
-                    casas.add(new CasaTroca(i));
-                    break;
-                default:
-                    System.out.println("Tipo de casa inválido. Adicionando casa Simples.");
-                    casas.add(new CasaSimples(i));
-                    break;
-            }
+            CasaFactory.criarCasa(tipo, i, casas);
         }
 
         System.out.println("Modo debug? (true/false):");
