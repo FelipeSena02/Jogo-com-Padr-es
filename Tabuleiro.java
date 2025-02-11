@@ -1,21 +1,37 @@
 package tabuleiro;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Scanner;
 
 public class Tabuleiro {
-	private List<Jogador> jogadores;
+    private static Tabuleiro instanciaUnica;
+
+    private List<Jogador> jogadores;
     private List<Casa> casas;
     private boolean modoDebug;
 
-    public Tabuleiro(List<Jogador> jogadores, boolean modoDebug, List<Casa> casas) {
+
+    private Tabuleiro() {}
+
+
+    public static Tabuleiro getInstance() {
+        if (instanciaUnica == null) {
+            instanciaUnica = new Tabuleiro();
+        }
+        return instanciaUnica;
+    }
+
+
+    public void configurarTabuleiro(List<Jogador> jogadores, boolean modoDebug, List<Casa> casas) {
         this.jogadores = jogadores;
         this.modoDebug = modoDebug;
         this.casas = casas;
-    }
 
+    }
+    public List<Casa> getCasas() {
+        return casas;
+
+    }
     public void jogar() {
         Scanner scanner = new Scanner(System.in);
         while (!verificarVencedor()) {
@@ -36,7 +52,7 @@ public class Tabuleiro {
                         System.out.println(jogador.getNome() + " jogou os dados e tirou " + casasMovimento);
                     }
                     jogador.mover(casasMovimento);
-                    casas.get(jogador.getPosicao()).aplicarRegra(jogador, jogadores); 
+                    casas.get(jogador.getPosicao()).aplicarRegra(jogador, jogadores);
                 } else {
                     jogador.setPodeJogar(true);
                 }
@@ -61,5 +77,5 @@ public class Tabuleiro {
         }
         return false;
     }
-
 }
+

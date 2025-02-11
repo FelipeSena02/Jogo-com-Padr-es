@@ -106,7 +106,10 @@ public class Main {
         System.out.println("Modo debug? (true/false):");
         boolean modoDebug = scanner.nextBoolean();
 
-        Tabuleiro tabuleiro = new Tabuleiro(jogadores, modoDebug, casas);
+        Tabuleiro tabuleiro = Tabuleiro.getInstance();
+        tabuleiro.configurarTabuleiro(jogadores, modoDebug, casas);
+
+
         tabuleiro.jogar();
 
         scanner.close();
