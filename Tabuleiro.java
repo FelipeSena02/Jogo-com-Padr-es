@@ -1,39 +1,58 @@
 package tabuleiro;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Tabuleiro {
-    private static Tabuleiro instanciaUnica;
-
+    private static Tabuleiro instanciaUnica; // Singleton
     private List<Jogador> jogadores;
     private List<Casa> casas;
     private boolean modoDebug;
+    private int ultimaCasa;
+    private static final Scanner scanner = new Scanner(System.in); // Scanner global para evitar fechamento
 
+    private Tabuleiro() {
+        this.jogadores = new ArrayList<>();
+        this.casas = new ArrayList<>();
+    }
 
-    private Tabuleiro() {}
-
-
-    public static Tabuleiro getInstance() {
+    // Método Singleton com sincronização para evitar múltiplas instâncias
+    public static synchronized Tabuleiro getInstance() {
         if (instanciaUnica == null) {
             instanciaUnica = new Tabuleiro();
         }
         return instanciaUnica;
     }
 
-
-    public void configurarTabuleiro(List<Jogador> jogadores, boolean modoDebug, List<Casa> casas) {
-        this.jogadores = jogadores;
+    // Configuração do tabuleiro (chamado pelo Facade `Jogo`)
+    public void configurarTabuleiro(int numCasas, boolean modoDebug) {
         this.modoDebug = modoDebug;
-        this.casas = casas;
+        this.ultimaCasa = numCasas;
+        this.casas.clear();
 
+        for (int i = 0; i < numCasas; i++) {
+            String tipo = definirTipoDeCasa(i); // Define o tipo de casa antes de criar
+            CasaFactory.criarCasa(tipo, i, casas);
+        }
     }
-    public List<Casa> getCasas() {
-        return casas;
 
+    // Método auxiliar para definir o tipo de casa com base na posição
+    private String definirTipoDeCasa(int numero) {
+        if (numero == 0) return "simples"; // Primeira casa sempre simples
+        if (numero == ultimaCasa - 1) return "troca"; // Última casa especial
+        if (numero % 5 == 0) return "sorte"; // Exemplo: múltiplos de 5 são sorte
+        if (numero % 7 == 0) return "azar"; // Exemplo: múltiplos de 7 são azar
+        return "simples"; // Padrão
     }
+
+    // Adiciona jogadores ao tabuleiro
+    public void adicionarJogador(Jogador jogador) {
+        jogadores.add(jogador);
+    }
+
+    // Método que gerencia o jogo
     public void jogar() {
-        Scanner scanner = new Scanner(System.in);
         while (!verificarVencedor()) {
             for (Jogador jogador : jogadores) {
                 if (jogador.getPrisoes() > 0) {
@@ -41,41 +60,55 @@ public class Tabuleiro {
                     System.out.println(jogador.getNome() + " está preso e não pode jogar nesta rodada.");
                     continue;
                 }
+
                 if (jogador.podeJogar()) {
                     System.out.println("Vez de " + jogador.getNome() + " (" + jogador.getCor() + ")");
                     int casasMovimento;
+
                     if (modoDebug) {
-                        System.out.println("Insira o número da casa que " + jogador.getNome() + " deve ir: ");
+                        System.out.print("Insira o número da casa para " + jogador.getNome() + ": ");
                         casasMovimento = scanner.nextInt() - jogador.getPosicao();
                     } else {
                         casasMovimento = jogador.jogarDados();
                         System.out.println(jogador.getNome() + " jogou os dados e tirou " + casasMovimento);
                     }
-                    jogador.mover(casasMovimento);
-                    casas.get(jogador.getPosicao()).aplicarRegra(jogador, jogadores);
+
+                    int novaPosicao = jogador.getPosicao() + casasMovimento;
+
+                    // Ajustar para não ultrapassar a última casa
+                    if (novaPosicao >= ultimaCasa) {
+                        novaPosicao = ultimaCasa;
+                        System.out.println(jogador.getNome() + " chegou ao final!");
+                    }
+
+                    jogador.setPosicao(novaPosicao);
+                    casas.get(novaPosicao).aplicarRegra(jogador, jogadores);
                 } else {
                     jogador.setPodeJogar(true);
                 }
-                mostrarPosicoes();
+
+                exibirEstadoAtual();
             }
         }
-        scanner.close();
     }
 
-    private void mostrarPosicoes() {
+    // Exibe o estado atual do jogo
+    public void exibirEstadoAtual() {
+        System.out.println("\n📌 Estado Atual do Jogo:");
         for (Jogador jogador : jogadores) {
-            System.out.println(jogador);
+            System.out.println(jogador.getNome() + " está na casa " + jogador.getPosicao() + " com " + jogador.getMoedas() + " moedas.");
         }
+        System.out.println("----------------------------");
     }
 
+    // Verifica se há um vencedor
     private boolean verificarVencedor() {
         for (Jogador jogador : jogadores) {
-            if (jogador.getPosicao() >= casas.size() - 1) {
-                System.out.println(jogador.getNome() + " venceu o jogo!");
+            if (jogador.getPosicao() >= ultimaCasa) {
+                System.out.println("\n🏆 " + jogador.getNome() + " venceu o jogo!\n");
                 return true;
             }
         }
         return false;
     }
 }
-
