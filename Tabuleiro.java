@@ -36,7 +36,9 @@ public class Tabuleiro {
                         System.out.println(jogador.getNome() + " jogou os dados e tirou " + casasMovimento);
                     }
                     jogador.mover(casasMovimento);
-                    casas.get(jogador.getPosicao()).aplicarRegra(jogador, jogadores); 
+                    if (jogador.getPosicao() < casas.size()) {
+                        casas.get(jogador.getPosicao()).aplicarRegra(jogador, jogadores);
+                    } 
                 } else {
                     jogador.setPodeJogar(true);
                 }
